@@ -24,6 +24,9 @@ static SDL_Texture *player_texture;
 static SDL_Texture *enemy_texture;
 static SDL_Texture *bullet_texture;
 
+static Mix_Chunk *shot;
+static Mix_Chunk *explosion;
+
 static int spawn_enemy_timer;
 
 void init_game(void)
@@ -35,6 +38,9 @@ void init_game(void)
 	enemy_texture = loadTexture("resources/img/enemy.png");
 	bullet_texture = loadTexture("resources/img/bullet.png");
 
+	shot = Mix_LoadWAV("resources/Audio/fire.wav");
+	explosion = Mix_LoadWAV("resources/Audio/explosion.wav");
+
 	memset(sdl.key, 0, sizeof(int) * MAX_KEYS);
 	memset(&game, 0, sizeof(Game));
 
@@ -42,6 +48,16 @@ void init_game(void)
 	game.bulletTail = &game.bulletHead;
 
 	player_init();
+}
+
+void play_shot()
+{
+	Mix_PlayChannel(-1, shot, 0);
+}
+
+void play_explosions()
+{
+	Mix_PlayChannel(-1, explosion, 0);
 }
 
 static void player_init()
@@ -90,6 +106,7 @@ static void player_control(void)
 		if (sdl.key[SDL_SCANCODE_SPACE] && player->reload <= 0)
 		{
 			shot_bullet();
+			play_shot();
 		}
 
 		if (player->reload > 0)
@@ -223,16 +240,26 @@ int collision(int x1, int y1, int w1, int h1, int x2, int y2, int w2, int h2)
 
 static int player_health(Entity *enemy)
 {
-	if (collision(player->x, player->y, player->width, player->height, enemy->x, enemy->y, enemy->width, enemy->height) || enemy->y == SCREEN_HEIGHT)
+	if (collision(player->x, player->y, player->width, player->height, enemy->x, enemy->y, enemy->width, enemy->height))
 	{
+
+		play_explosions();
+
 		player->lives--;
 
-		if (player->lives < 1)
-		{
-			game_over();
-		}
 		return 1;
 	}
+
+	if (enemy->y == SCREEN_HEIGHT)
+	{
+		player->lives--;
+	}
+
+	if (player->lives < 1)
+	{
+		game_over();
+	}
+
 	return 0;
 }
 
@@ -249,6 +276,7 @@ static int bullet_hit(Entity *bullet)
 
 			if (enemy->lives == 0)
 			{
+				play_explosions();
 				game.score = game.score + 10;
 			}
 			return 1;
@@ -349,6 +377,12 @@ static void draw(void)
 
 void SDL_close(void)
 {
+	Mix_FreeChunk(shot);
+
+	Mix_FreeChunk(explosion);
+    
+	Mix_CloseAudio();
+
 	SDL_DestroyRenderer(sdl.renderer);
 
 	SDL_DestroyWindow(sdl.window);

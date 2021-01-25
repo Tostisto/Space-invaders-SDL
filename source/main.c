@@ -16,6 +16,13 @@ int main(void)
 	sdl.renderer = SDL_CreateRenderer(sdl.window, -1, SDL_RENDERER_ACCELERATED);
 	IMG_Init(IMG_INIT_PNG);
 
+    Mix_Init(0);
+    Mix_OpenAudio(22050, MIX_DEFAULT_FORMAT, 2, 1024);
+
+	Mix_Music* music;
+    music = Mix_LoadMUS("resources/Audio/audio_hero_911_SIPML_J-0501.mp3");
+	Mix_PlayMusic(music, -1);
+	
 	menu_init();
 
 	memset(&game, 0, sizeof(Game));
@@ -35,6 +42,9 @@ int main(void)
 
 		SDL_Delay(16);
 	}
+
+	Mix_FreeMusic(music);
+	Mix_Quit();
 
 	return 0;
 }
