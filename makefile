@@ -3,7 +3,7 @@ CXX = gcc
 OUT = obj
 
 CFLAGS += `sdl2-config --cflags`
-LDFLAGS += `sdl2-config --libs` -lSDL2_ttf -lSDL2_image 
+LDFLAGS += `sdl2-config --libs` -lSDL2_ttf -lSDL2_image  -lSDL2_mixer
 
 vpath %.c %.h source
 vpath %.h source
