@@ -50,6 +50,7 @@ static void draw(void)
 	draw_text(sdl.renderer, font, &texture, &exit, 440, 500, "QUIT - ESCAPE");
 	SDL_RenderCopy(sdl.renderer, texture, NULL, &exit);
 
+	TTF_CloseFont(big_font);
 	TTF_CloseFont(font);
 	SDL_DestroyTexture(texture);
 	TTF_Quit();

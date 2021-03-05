@@ -26,6 +26,7 @@ static SDL_Texture *bullet_texture;
 
 static Mix_Chunk *shot;
 static Mix_Chunk *explosion;
+static Mix_Chunk *gameover;
 
 static int spawn_enemy_timer;
 
@@ -40,6 +41,7 @@ void init_game(void)
 
 	shot = Mix_LoadWAV("resources/Audio/fire.wav");
 	explosion = Mix_LoadWAV("resources/Audio/explosion.wav");
+	gameover = Mix_LoadWAV("resources/Audio/gameover.wav");
 
 	memset(sdl.key, 0, sizeof(int) * MAX_KEYS);
 	memset(&game, 0, sizeof(Game));
@@ -48,16 +50,6 @@ void init_game(void)
 	game.bulletTail = &game.bulletHead;
 
 	player_init();
-}
-
-void play_shot()
-{
-	Mix_PlayChannel(-1, shot, 0);
-}
-
-void play_explosions()
-{
-	Mix_PlayChannel(-1, explosion, 0);
 }
 
 static void player_init()
@@ -106,7 +98,7 @@ static void player_control(void)
 		if (sdl.key[SDL_SCANCODE_SPACE] && player->reload <= 0)
 		{
 			shot_bullet();
-			play_shot();
+			Mix_PlayChannel(-1, shot, 0);
 		}
 
 		if (player->reload > 0)
@@ -242,10 +234,9 @@ static int player_health(Entity *enemy)
 {
 	if (collision(player->x, player->y, player->width, player->height, enemy->x, enemy->y, enemy->width, enemy->height))
 	{
-
-		play_explosions();
-
 		player->lives--;
+
+		Mix_PlayChannel(-1, explosion, 0);
 
 		return 1;
 	}
@@ -253,11 +244,15 @@ static int player_health(Entity *enemy)
 	if (enemy->y == SCREEN_HEIGHT)
 	{
 		player->lives--;
+
+		return 1;
 	}
 
 	if (player->lives < 1)
 	{
 		game_over();
+
+		Mix_PlayChannel(-1, gameover, 0);
 	}
 
 	return 0;
@@ -276,7 +271,8 @@ static int bullet_hit(Entity *bullet)
 
 			if (enemy->lives == 0)
 			{
-				play_explosions();
+				Mix_PlayChannel(-1, explosion, 0);
+
 				game.score = game.score + 10;
 			}
 			return 1;
@@ -380,8 +376,12 @@ void SDL_close(void)
 	Mix_FreeChunk(shot);
 
 	Mix_FreeChunk(explosion);
-    
+
+	Mix_FreeChunk(gameover);
+
 	Mix_CloseAudio();
+
+	Mix_Quit();
 
 	SDL_DestroyRenderer(sdl.renderer);
 

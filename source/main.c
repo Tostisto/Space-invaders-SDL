@@ -20,7 +20,7 @@ int main(void)
     Mix_OpenAudio(22050, MIX_DEFAULT_FORMAT, 2, 1024);
 
 	Mix_Music* music;
-    music = Mix_LoadMUS("resources/Audio/audio_hero_911_SIPML_J-0501.mp3");
+    music = Mix_LoadMUS("resources/Audio/audio-hero-911-SIPML-J-0501.mp3");
 	Mix_PlayMusic(music, -1);
 	
 	menu_init();
